@@ -1,6 +1,7 @@
 import sqlite3
+from abc import ABC, abstractmethod
 
-class User:
+class SejatiMethod(ABC):
     def __init__(self):
         self.con = sqlite3.connect('sejati.db')
         self.cursor = self.con.cursor()
@@ -12,225 +13,223 @@ class User:
         if retVal:
             return all_results
 
+    @abstractmethod
     def setDataUser(self, id_user, username, password, namaLengkap, tanggalLahir, status, role):
-        self.query = 'INSERT INTO user (id_user, username, password, namaLengkap, tanggalLahir, status, role) VALUES (%s, \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\')' 
-        self.query = self.query % (id_user, username, password, namaLengkap, tanggalLahir, status, role)
-        self.executeQuery(self.query)
-    
+        pass
+
+    @abstractmethod
     def setUbahDataUser(self, id_user, username, password, namaLengkap, tanggalLahir, status, role):
-        self.query = 'UPDATE user set id_user = %s, username = \'%s\', password = \'%s\', namaLengkap = \'%s\', tanggalLahir = \'%s\', status = \'%s\', role = \'%s\' WHERE id_user = %s'
-        self.query = self.query % (id_user, username, password, namaLengkap, tanggalLahir, status, role, id_user)
-        self.executeQuery(self.query)
+        pass
 
+    @abstractmethod
     def getDataUser(self):
-        self.query = 'SELECT * FROM user'
-        id_user = self.executeQuery(self.query, retVal=True)
-        return id_user
+        pass
 
-class Admin(User):
-    def setDataAdmin(self, id_admin, bagian, jamKerja, id_user, username, password, namaLengkap, tanggalLahir, status, role):
-        self.setDataUser(id_user, username, password, namaLengkap, tanggalLahir, status, role)
-        id_user = self.getDataUser(id_user, username, password, namaLengkap, tanggalLahir, status, role)
+    @abstractmethod
+    def getDaftarUser(self):
+        pass
+
+class Admin(SejatiMethod):
+    def setDataUser(self, id_admin, bagian, jamKerja, id_user, username, password, namaLengkap, tanggalLahir, status, role):
         self.query = 'INSERT INTO admin (id_admin, bagian, jamKerja, id_user, username, password, namaLengkap, tanggalLahir, status, role) values (%s, \'%s\', \'%s\', %s, \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\')' 
-        self.query = self.query % (id_admin, bagian, jamKerja, id_user[0][0])
+        self.query = self.query % (id_admin, bagian, jamKerja, id_user[3][0])
         self.executeQuery(self.query)
     
-    def setUbahDataAdmin(self, id_user, id_admin, bagian, jamKerja):
+    def setUbahDataUser(self, id_admin, bagian, jamKerja, id_user, username, password, namaLengkap, tanggalLahir, status, role):
         self.query = 'UPDATE admin set id_admin = %s, bagian = \'%s\', jamKerja = \'%s\', id_user = %s WHERE id_admin = %s'
         self.query = self.query % (id_admin, bagian, jamKerja, id_user, id_admin)
         self.executeQuery(self.query)
 
-    def getDaftarAdmin(self):
+    def getDaftarUser(self):
         self.query = 'SELECT t2.id_user, t2.username, t2.password, t2.namaLengkap, t2.tanggalLahir, t2.status, t2.role, t1.id_admin, t1.bagian, t1.jamKerja FROM admin t1 join user t2 on t1.id_user=t2.id_user' 
         daftar = self.executeQuery(self.query, True)
         return daftar
     
-    def getDataAdmin(self):
+    def getDataUser(self):
         self.query = 'SELECT t2.id_user, t2.username, t2.password, t2.namaLengkap, t2.tanggalLahir, t2.status, t2.role, t1.id_admin, t1.bagian, t1.jamKerja FROM admin t1 join user t2 on t1.id_user=t2.id_user WHERE username = \'%s\'' 
         self.query = self.query % (username)
         daftar = self.executeQuery(self.query, True)
         return daftar
 
-class Pemilik(User):
-    def setDataPemilik(self, id_user, id_pemilik):
-        self.query = 'INSERT INTO pemilik (id_pemilik, id_user) values (%s, %s)' 
-        self.query = self.query % (id_pemilik, id_user)
-        self.executeQuery(self.query)
+# class Pemilik(User):
+#     def setDataPemilik(self, id_user, id_pemilik):
+#         self.query = 'INSERT INTO pemilik (id_pemilik, id_user) values (%s, %s)' 
+#         self.query = self.query % (id_pemilik, id_user)
+#         self.executeQuery(self.query)
 
-    def setUbahDataPemilik(self, id_user, id_pemilik):
-        self.query = 'UPDATE pemilik set id_pemilik = %s, id_user = %s WHERE id_pemilik = %s'
-        self.query = self.query % (id_pemilik, id_user, id_pemilik)
-        self.executeQuery(self.query)
+#     def setUbahDataPemilik(self, id_user, id_pemilik):
+#         self.query = 'UPDATE pemilik set id_pemilik = %s, id_user = %s WHERE id_pemilik = %s'
+#         self.query = self.query % (id_pemilik, id_user, id_pemilik)
+#         self.executeQuery(self.query)
 
-    def getDaftarPemilik(self):
-        self.query = 'SELECT t1.id_pemilik, t2.id_user, t2.username, t2.password, t2.namaLengkap, t2.tanggalLahir, t2.status, t2.role FROM pemilik t1 join user t2 on t1.id_user=t2.id_user' 
-        daftar = self.executeQuery(self.query, True)
-        return daftar
+#     def getDaftarPemilik(self):
+#         self.query = 'SELECT t1.id_pemilik, t2.id_user, t2.username, t2.password, t2.namaLengkap, t2.tanggalLahir, t2.status, t2.role FROM pemilik t1 join user t2 on t1.id_user=t2.id_user' 
+#         daftar = self.executeQuery(self.query, True)
+#         return daftar
 
-class Customer(User):
-    def setDataCustomer(self, id_user, id_customer, nomorHandphone, alamatRumah):
-        self.query = 'INSERT INTO customer (id_customer, nomorHandphone, alamatRumah, id_user) values (%s, \'%s\', \'%s\', %s)' 
-        self.query = self.query % (id_customer, nomorHandphone, alamatRumah, id_user)
-        self.executeQuery(self.query)
+# class Customer(User):
+#     def setDataCustomer(self, id_user, id_customer, nomorHandphone, alamatRumah):
+#         self.query = 'INSERT INTO customer (id_customer, nomorHandphone, alamatRumah, id_user) values (%s, \'%s\', \'%s\', %s)' 
+#         self.query = self.query % (id_customer, nomorHandphone, alamatRumah, id_user)
+#         self.executeQuery(self.query)
     
-    def setUbahDataCustomer(self, id_user, id_customer, nomorHandphone, alamatRumah):
-        self.query = 'UPDATE customer set id_customer = %s, nomorHandphone = \'%s\', alamatRumah = \'%s\', id_user = %s WHERE id_customer = %s'
-        self.query = self.query % (id_customer, nomorHandphone, alamatRumah, id_user, id_customer)
-        self.executeQuery(self.query)
+#     def setUbahDataCustomer(self, id_user, id_customer, nomorHandphone, alamatRumah):
+#         self.query = 'UPDATE customer set id_customer = %s, nomorHandphone = \'%s\', alamatRumah = \'%s\', id_user = %s WHERE id_customer = %s'
+#         self.query = self.query % (id_customer, nomorHandphone, alamatRumah, id_user, id_customer)
+#         self.executeQuery(self.query)
 
-    def getDaftarCustomer(self):
-        self.query = 'SELECT t1.id_customer, t2.id_user, t2.username, t2.password, t2.namaLengkap, t2.tanggalLahir, t2.status, t2.role, t1.nomorHandphone, t1.alamatRumah FROM customer t1 join user t2 on t1.id_user=t2.id_user' 
-        daftar = self.executeQuery(self.query, True)
-        return daftar
+#     def getDaftarCustomer(self):
+#         self.query = 'SELECT t1.id_customer, t2.id_user, t2.username, t2.password, t2.namaLengkap, t2.tanggalLahir, t2.status, t2.role, t1.nomorHandphone, t1.alamatRumah FROM customer t1 join user t2 on t1.id_user=t2.id_user' 
+#         daftar = self.executeQuery(self.query, True)
+#         return daftar
 
-    def getDataCustomer(self):
-        self.query = 'SELECT t1.id_customer, t2.id_user, t2.username, t2.password, t2.namaLengkap, t2.tanggalLahir, t2.status, t2.role, t1.nomorHandphone, t1.alamatRumah FROM customer t1 join user t2 on t1.id_user=t2.id_user WHERE username = \'%s\'' 
-        self.query = self.query % (username)
-        daftar = self.executeQuery(self.query, True)
-        return daftar
+#     def getDataCustomer(self):
+#         self.query = 'SELECT t1.id_customer, t2.id_user, t2.username, t2.password, t2.namaLengkap, t2.tanggalLahir, t2.status, t2.role, t1.nomorHandphone, t1.alamatRumah FROM customer t1 join user t2 on t1.id_user=t2.id_user WHERE username = \'%s\'' 
+#         self.query = self.query % (username)
+#         daftar = self.executeQuery(self.query, True)
+#         return daftar
 
-class Kasir(User):
-    def setDataKasir(self, id_user, id_kasir, jamKerja, nomorHandphone):
-        self.query = 'INSERT INTO kasir (id_kasir, jamKerja, nomorHandphone, id_user) values (%s, \'%s\', \'%s\', %s)' 
-        self.query = self.query % (id_kasir, jamKerja, nomorHandphone, id_user)
-        self.executeQuery(self.query)
+# class Kasir(User):
+#     def setDataKasir(self, id_user, id_kasir, jamKerja, nomorHandphone):
+#         self.query = 'INSERT INTO kasir (id_kasir, jamKerja, nomorHandphone, id_user) values (%s, \'%s\', \'%s\', %s)' 
+#         self.query = self.query % (id_kasir, jamKerja, nomorHandphone, id_user)
+#         self.executeQuery(self.query)
     
-    def setUbahDataKasir(self, id_user, id_kasir, jamKerja, nomorHandphone):
-        self.query = 'UPDATE kasir set id_kasir = %s, jamKerja = \'%s\', nomorHandphone = \'%s\', id_user = %s WHERE id_kasir = %s'
-        self.query = self.query % (id_kasir, jamKerja, nomorHandphone, id_user, id_kasir)
-        self.executeQuery(self.query)
+#     def setUbahDataKasir(self, id_user, id_kasir, jamKerja, nomorHandphone):
+#         self.query = 'UPDATE kasir set id_kasir = %s, jamKerja = \'%s\', nomorHandphone = \'%s\', id_user = %s WHERE id_kasir = %s'
+#         self.query = self.query % (id_kasir, jamKerja, nomorHandphone, id_user, id_kasir)
+#         self.executeQuery(self.query)
 
-    def getDaftarKasir(self):
-        self.query = 'SELECT t2.id_user, t2.username, t2.password, t2.namaLengkap, t2.tanggalLahir, t2.status, t2.role, t1.id_kasir, t1.jamKerja, t1.nomorHandphone FROM kasir t1 join user t2 on t1.id_user=t2.id_user' 
-        daftar = self.executeQuery(self.query, True)
-        return daftar
+#     def getDaftarKasir(self):
+#         self.query = 'SELECT t2.id_user, t2.username, t2.password, t2.namaLengkap, t2.tanggalLahir, t2.status, t2.role, t1.id_kasir, t1.jamKerja, t1.nomorHandphone FROM kasir t1 join user t2 on t1.id_user=t2.id_user' 
+#         daftar = self.executeQuery(self.query, True)
+#         return daftar
 
-    def getDataKasir(self):
-        self.query = 'SELECT t2.id_user, t2.username, t2.password, t2.namaLengkap, t2.tanggalLahir, t2.status, t2.role, t1.id_kasir, t1.jamKerja, t1.nomorHandphone FROM kasir t1 join user t2 on t1.id_user=t2.id_user WHERE username = \'%s\'' 
-        self.query = self.query % (username)
-        daftar = self.executeQuery(self.query, True)
-        return daftar
+#     def getDataKasir(self):
+#         self.query = 'SELECT t2.id_user, t2.username, t2.password, t2.namaLengkap, t2.tanggalLahir, t2.status, t2.role, t1.id_kasir, t1.jamKerja, t1.nomorHandphone FROM kasir t1 join user t2 on t1.id_user=t2.id_user WHERE username = \'%s\'' 
+#         self.query = self.query % (username)
+#         daftar = self.executeQuery(self.query, True)
+#         return daftar
 
-class Produk:
-    def __init__(self):
-        self.con = sqlite3.connect('sejati.db')
-        self.cursor = self.con.cursor()
+# class Produk:
+#     def __init__(self):
+#         self.con = sqlite3.connect('sejati.db')
+#         self.cursor = self.con.cursor()
     
-    def executeQuery(self, query, retVal=False):
-        self.cursor.execute(query)
-        all_results = self.cursor.fetchall()
-        self.con.commit()
-        if retVal:
-            return all_results
+#     def executeQuery(self, query, retVal=False):
+#         self.cursor.execute(query)
+#         all_results = self.cursor.fetchall()
+#         self.con.commit()
+#         if retVal:
+#             return all_results
 
-    def setDataProduk(self, id, jenisProduk, merk, deskripsi, warna, ukuran, jenisBahan, harga, stok):
-        self.query = 'INSERT INTO produk (id, jenisProduk, merk, deskripsi, warna, ukuran, jenisBahan, harga, stok) VALUES (%s, \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', %s, %s)' 
-        self.query = self.query % (id, jenisProduk, merk, deskripsi, warna, ukuran, jenisBahan, harga, stok)
-        self.executeQuery(self.query)
+#     def setDataProduk(self, id, jenisProduk, merk, deskripsi, warna, ukuran, jenisBahan, harga, stok):
+#         self.query = 'INSERT INTO produk (id, jenisProduk, merk, deskripsi, warna, ukuran, jenisBahan, harga, stok) VALUES (%s, \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', %s, %s)' 
+#         self.query = self.query % (id, jenisProduk, merk, deskripsi, warna, ukuran, jenisBahan, harga, stok)
+#         self.executeQuery(self.query)
     
-    def setUbahDataProduk(self, id, jenisProduk, merk, deskripsi, warna, ukuran, jenisBahan, harga, stok):
-        self.query = 'UPDATE produk SET id = %s, jenisProduk = \'%s\', merk = \'%s\', deskripsi = \'%s\', warna = \'%s\', ukuran = \'%s\', jenisBahan = \'%s\',  harga = %s, stok = %s  WHERE id = %s'
-        self.query = self.query % (id, jenisProduk, merk, deskripsi, warna, ukuran, jenisBahan, harga, stok, id)
-        self.executeQuery(self.query)
+#     def setUbahDataProduk(self, id, jenisProduk, merk, deskripsi, warna, ukuran, jenisBahan, harga, stok):
+#         self.query = 'UPDATE produk SET id = %s, jenisProduk = \'%s\', merk = \'%s\', deskripsi = \'%s\', warna = \'%s\', ukuran = \'%s\', jenisBahan = \'%s\',  harga = %s, stok = %s  WHERE id = %s'
+#         self.query = self.query % (id, jenisProduk, merk, deskripsi, warna, ukuran, jenisBahan, harga, stok, id)
+#         self.executeQuery(self.query)
 
-    def getDataProduk(self):
-        self.query = 'SELECT * FROM produk'
-        id = self.executeQuery(self.query, retVal=True)
-        return id
+#     def getDataProduk(self):
+#         self.query = 'SELECT * FROM produk'
+#         id = self.executeQuery(self.query, retVal=True)
+#         return id
 
-class Celana(Produk):
-    def setDataCelana(self, id, id_celana, modelCelana):
-        self.query = 'INSERT INTO celana (id_celana, modelCelana, id) values (%s, \'%s\', %s)' 
-        self.query = self.query % (id_celana, modelCelana, id)
-        self.executeQuery(self.query)
+# class Celana(Produk):
+#     def setDataCelana(self, id, id_celana, modelCelana):
+#         self.query = 'INSERT INTO celana (id_celana, modelCelana, id) values (%s, \'%s\', %s)' 
+#         self.query = self.query % (id_celana, modelCelana, id)
+#         self.executeQuery(self.query)
     
-    def setUbahDataCelana(self, id, id_celana, modelCelana):
-        self.query = 'UPDATE celana set id_celana = %s, modelCelana = \'%s\', id = %s WHERE id_celana = %s'
-        self.query = self.query % (id_celana, modelCelana, id, id_celana)
-        self.executeQuery(self.query)
+#     def setUbahDataCelana(self, id, id_celana, modelCelana):
+#         self.query = 'UPDATE celana set id_celana = %s, modelCelana = \'%s\', id = %s WHERE id_celana = %s'
+#         self.query = self.query % (id_celana, modelCelana, id, id_celana)
+#         self.executeQuery(self.query)
 
-    def getDaftarCelana(self):
-        self.query = 'SELECT t1.id_celana, t2.id, t2.jenisProduk, t2.merk, t2.deskripsi, t2.warna, t2.ukuran, t2.jenisBahan, t2.harga, t2.stok, t1.modelCelana FROM celana t1 join produk t2 on t1.id=t2.id' 
-        daftar = self.executeQuery(self.query, True)
-        return daftar
+#     def getDaftarCelana(self):
+#         self.query = 'SELECT t1.id_celana, t2.id, t2.jenisProduk, t2.merk, t2.deskripsi, t2.warna, t2.ukuran, t2.jenisBahan, t2.harga, t2.stok, t1.modelCelana FROM celana t1 join produk t2 on t1.id=t2.id' 
+#         daftar = self.executeQuery(self.query, True)
+#         return daftar
 
-class Baju(Produk):
-    def setDataBaju(self, id, id_baju, modelBaju):
-        self.query = 'INSERT INTO baju (id_baju, modelBaju, id) values (%s, \'%s\', %s)' 
-        self.query = self.query % (id_baju, modelBaju, id)
-        self.executeQuery(self.query)
+# class Baju(Produk):
+#     def setDataBaju(self, id, id_baju, modelBaju):
+#         self.query = 'INSERT INTO baju (id_baju, modelBaju, id) values (%s, \'%s\', %s)' 
+#         self.query = self.query % (id_baju, modelBaju, id)
+#         self.executeQuery(self.query)
     
-    def setUbahDataBaju(self, id, id_baju, modelBaju):
-        self.query = 'UPDATE baju set id_baju = %s, modelBaju = \'%s\', id = %s WHERE id_baju = %s'
-        self.query = self.query % (id_baju, modelBaju, id, id_baju)
-        self.executeQuery(self.query)
+#     def setUbahDataBaju(self, id, id_baju, modelBaju):
+#         self.query = 'UPDATE baju set id_baju = %s, modelBaju = \'%s\', id = %s WHERE id_baju = %s'
+#         self.query = self.query % (id_baju, modelBaju, id, id_baju)
+#         self.executeQuery(self.query)
 
-    def getDaftarBaju(self):
-        self.query = 'SELECT t1.id_baju, t2.id, t2.jenisProduk, t2.merk, t2.deskripsi, t2.warna, t2.ukuran, t2.jenisBahan, t2.harga, t2.stok, t1.modelBaju FROM baju t1 join produk t2 on t1.id=t2.id' 
-        daftar = self.executeQuery(self.query, True)
-        return daftar
+#     def getDaftarBaju(self):
+#         self.query = 'SELECT t1.id_baju, t2.id, t2.jenisProduk, t2.merk, t2.deskripsi, t2.warna, t2.ukuran, t2.jenisBahan, t2.harga, t2.stok, t1.modelBaju FROM baju t1 join produk t2 on t1.id=t2.id' 
+#         daftar = self.executeQuery(self.query, True)
+#         return daftar
 
-class Tas(Produk):
-    def setDataTas(self, id, id_tas, namaTas):
-        self.query = 'INSERT INTO tas (id_tas, namaTas, id) values (%s, \'%s\', %s)' 
-        self.query = self.query % (id_tas, namaTas, id)
-        self.executeQuery(self.query)
+# class Tas(Produk):
+#     def setDataTas(self, id, id_tas, namaTas):
+#         self.query = 'INSERT INTO tas (id_tas, namaTas, id) values (%s, \'%s\', %s)' 
+#         self.query = self.query % (id_tas, namaTas, id)
+#         self.executeQuery(self.query)
     
-    def setUbahDataTas(self, id, id_tas, namaTas):
-        self.query = 'UPDATE tas set id_tas = %s, namaTas = \'%s\', id = %s WHERE id_tas = %s'
-        self.query = self.query % (id_tas, namaTas, id, id_tas)
-        self.executeQuery(self.query)
+#     def setUbahDataTas(self, id, id_tas, namaTas):
+#         self.query = 'UPDATE tas set id_tas = %s, namaTas = \'%s\', id = %s WHERE id_tas = %s'
+#         self.query = self.query % (id_tas, namaTas, id, id_tas)
+#         self.executeQuery(self.query)
 
-    def getDaftarTas(self):
-        self.query = 'SELECT t1.id_tas, t2.id, t2.jenisProduk, t2.merk, t2.deskripsi, t2.warna, t2.ukuran, t2.jenisBahan, t2.harga, t2.stok, t1.namaTas FROM tas t1 join produk t2 on t1.id=t2.id' 
-        daftar = self.executeQuery(self.query, True)
-        return daftar
+#     def getDaftarTas(self):
+#         self.query = 'SELECT t1.id_tas, t2.id, t2.jenisProduk, t2.merk, t2.deskripsi, t2.warna, t2.ukuran, t2.jenisBahan, t2.harga, t2.stok, t1.namaTas FROM tas t1 join produk t2 on t1.id=t2.id' 
+#         daftar = self.executeQuery(self.query, True)
+#         return daftar
 
-class Pesanan(Kasir, User):
-    def setDataPesanan(self, id_kasir, id, statusPesanan, tanggalPenerimaan, verifikasi):
-        self.query = 'INSERT INTO pesanan (id, statusPesanan, tanggalPenerimaan, verifikasi, id_kasir) values (%s, \'%s\', \'%s\', \'%s\', %s)' 
-        self.query = self.query % (id, statusPesanan, tanggalPenerimaan, verifikasi, id_kasir)
-        print(self.query)
-        self.executeQuery(self.query)
+# class Pesanan(Kasir, User):
+#     def setDataPesanan(self, id_kasir, id, statusPesanan, tanggalPenerimaan, verifikasi):
+#         self.query = 'INSERT INTO pesanan (id, statusPesanan, tanggalPenerimaan, verifikasi, id_kasir) values (%s, \'%s\', \'%s\', \'%s\', %s)' 
+#         self.query = self.query % (id, statusPesanan, tanggalPenerimaan, verifikasi, id_kasir)
+#         print(self.query)
+#         self.executeQuery(self.query)
     
-    def setUbahDataPesanan(self, id_kasir, id, statusPesanan, tanggalPenerimaan, verifikasi):
-        self.query = 'UPDATE pesanan set id = %s, statusPesanan = \'%s\', tanggalPenerimaan = \'%s\', verifikasi = \'%s\', id_kasir = %s WHERE id = %s'
-        self.query = self.query % (id, statusPesanan, tanggalPenerimaan, verifikasi, id_kasir, id)
-        self.executeQuery(self.query)
+#     def setUbahDataPesanan(self, id_kasir, id, statusPesanan, tanggalPenerimaan, verifikasi):
+#         self.query = 'UPDATE pesanan set id = %s, statusPesanan = \'%s\', tanggalPenerimaan = \'%s\', verifikasi = \'%s\', id_kasir = %s WHERE id = %s'
+#         self.query = self.query % (id, statusPesanan, tanggalPenerimaan, verifikasi, id_kasir, id)
+#         self.executeQuery(self.query)
 
-    def getDaftarPesanan(self):
-        self.query = 'SELECT t1.id, t1.statusPesanan, t1.tanggalPenerimaan, t1.verifikasi, t3.id_user, t3.username, t3.password, t3.namaLengkap, t3.tanggalLahir, t3.status, t3.role, t2.id_kasir, t2.jamKerja, t2.nomorHandphone FROM pesanan t1 INNER JOIN kasir t2 ON t1.id_kasir=t2.id_kasir INNER JOIN user t3 ON t2.id_user=t3.id_user' 
-        daftar = self.executeQuery(self.query, True)
-        return daftar
+#     def getDaftarPesanan(self):
+#         self.query = 'SELECT t1.id, t1.statusPesanan, t1.tanggalPenerimaan, t1.verifikasi, t3.id_user, t3.username, t3.password, t3.namaLengkap, t3.tanggalLahir, t3.status, t3.role, t2.id_kasir, t2.jamKerja, t2.nomorHandphone FROM pesanan t1 INNER JOIN kasir t2 ON t1.id_kasir=t2.id_kasir INNER JOIN user t3 ON t2.id_user=t3.id_user' 
+#         daftar = self.executeQuery(self.query, True)
+#         return daftar
     
-    def getDataPesanan(self):
-        self.query = 'SELECT t1.id, t1.statusPesanan, t1.tanggalPenerimaan, t1.verifikasi, t3.namaLengkap, t3.role, t2.nomorHandphone FROM pesanan t1 join kasir t2 on t1.id_kasir=t2.id_kasir join user t3 on t2.id_user=t3.id_user WHERE id = %s'
-        self.query = self.query % (id)
-        daftar = self.executeQuery(self.query, True)
-        return daftar
+#     def getDataPesanan(self):
+#         self.query = 'SELECT t1.id, t1.statusPesanan, t1.tanggalPenerimaan, t1.verifikasi, t3.namaLengkap, t3.role, t2.nomorHandphone FROM pesanan t1 join kasir t2 on t1.id_kasir=t2.id_kasir join user t3 on t2.id_user=t3.id_user WHERE id = %s'
+#         self.query = self.query % (id)
+#         daftar = self.executeQuery(self.query, True)
+#         return daftar
 
-class DetailPesanan(Pesanan, Tas, Celana, Baju, Customer):
-    def setDataDetailPesanan(self, id, jumlahBaju, totalHarBaju, jumlahCelana, totalHarCelana, jumlahTas, totalHarTas, jumlahPembelian, hargaTotalProduk, id_pesanan, id_tas, id_celana, id_baju, id_customer):
-        self.query = 'INSERT INTO detailPesanan (id, jumlahBaju, totalHarBaju, jumlahCelana, totalHarCelana, jumlahTas, totalHarTas, jumlahPembelian, hargaTotalProduk, id_pesanan, id_tas, id_celana, id_baju, id_customer) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)' 
-        self.query = self.query % (id, jumlahBaju, totalHarBaju, jumlahCelana, totalHarCelana, jumlahTas, totalHarTas, jumlahPembelian, hargaTotalProduk, id_pesanan, id_tas, id_celana, id_baju, id_customer)
-        self.executeQuery(self.query)
+# class DetailPesanan(Pesanan, Tas, Celana, Baju, Customer):
+#     def setDataDetailPesanan(self, id, jumlahBaju, totalHarBaju, jumlahCelana, totalHarCelana, jumlahTas, totalHarTas, jumlahPembelian, hargaTotalProduk, id_pesanan, id_tas, id_celana, id_baju, id_customer):
+#         self.query = 'INSERT INTO detailPesanan (id, jumlahBaju, totalHarBaju, jumlahCelana, totalHarCelana, jumlahTas, totalHarTas, jumlahPembelian, hargaTotalProduk, id_pesanan, id_tas, id_celana, id_baju, id_customer) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)' 
+#         self.query = self.query % (id, jumlahBaju, totalHarBaju, jumlahCelana, totalHarCelana, jumlahTas, totalHarTas, jumlahPembelian, hargaTotalProduk, id_pesanan, id_tas, id_celana, id_baju, id_customer)
+#         self.executeQuery(self.query)
     
-    def getDaftarPesanan(self):
-        self.query = 'SELECT t1.id, t1.tanggalPesanan, t1.statusPesanan, t1.tanggalPenerimaan, t1.verifikasi, t2.id_kasir \ FROM pesanan t1 \ join kasir t2 on t1.id_kasir=t2.id_kasir' 
-        daftar = self.executeQuery(self.query, True)
-        return daftar
+#     def getDaftarPesanan(self):
+#         self.query = 'SELECT t1.id, t1.tanggalPesanan, t1.statusPesanan, t1.tanggalPenerimaan, t1.verifikasi, t2.id_kasir \ FROM pesanan t1 \ join kasir t2 on t1.id_kasir=t2.id_kasir' 
+#         daftar = self.executeQuery(self.query, True)
+#         return daftar
 
-pengguna = User()
 adm = Admin()
-owner = Pemilik()
-pelanggan = Customer()
-casher = Kasir()
-prod = Produk()
-cel = Celana()
-baj = Baju()
-taS = Tas()
-order = Pesanan()
-detailOrder = DetailPesanan()
+# owner = Pemilik()
+# pelanggan = Customer()
+# casher = Kasir()
+# prod = Produk()
+# cel = Celana()
+# baj = Baju()
+# taS = Tas()
+# order = Pesanan()
+# detailOrder = DetailPesanan()
 jalanUser = True
 def pilihanUser():
     print(70*"*")
@@ -374,7 +373,7 @@ def tambahDataAdmin():
     tanggalLahir = input('Masukkan Tanggal Lahir(y-m-d): ')
     status = input('Masukkan Status(Aktif, Tidak Aktif): ')
     role = input('Masukkan role(PEMILIK, ADMIN, CUSTOMER, KASIR): ')
-    adm.setDataAdmin(id_admin, bagian, jamKerja, id_user, username, password, namaLengkap, tanggalLahir, status, role)
+    adm.setDataUser(id_admin, bagian, jamKerja, id_user, username, password, namaLengkap, tanggalLahir, status, role)
     print('\n')
     print('Data Berhasil Ditambahkan')
 
