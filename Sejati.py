@@ -276,6 +276,11 @@ class Pesanan(Kasir, User):
         daftar = self.executeQuery(self.query, True)
         return daftar
 
+    def getDataRowPesanan(self):
+        self.query = 'SELECT id FROM pesanan ORDER BY id DESC LIMIT 1'
+        id = self.executeQuery(self.query, retVal=True)
+        return id
+
 class DetailPesanan(Pesanan, Tas, Celana, Baju, Customer):
     def getTotalHargaBaju(self, id_baju):
         self.query = 'SELECT t2.harga FROM baju t1 INNER JOIN produk t2 ON t2.id = t1.id WHERE t1.id_baju = %s'
@@ -342,6 +347,11 @@ class DetailPesanan(Pesanan, Tas, Celana, Baju, Customer):
         self.query = 'SELECT detailPesanan.id_customer, user1.namaLengkap, customer.nomorHandphone, customer.alamatRumah, detailPesanan.id, detailPesanan.tanggalPesanan, detailPesanan.id_celana, produk.jenisProduk, celana.modelCelana, produk.merk, produk.deskripsi, produk.warna, produk.ukuran, produk.jenisBahan, produk.harga, detailPesanan.jumlahCelana, detailPesanan.totalHarCelana, detailPesanan.id_baju, produk1.jenisProduk, baju.modelBaju, produk1.merk, produk1.deskripsi, produk1.warna, produk1.ukuran, produk1.jenisBahan, produk1.harga, detailPesanan.jumlahBaju, detailPesanan.totalHarBaju, detailPesanan.id_tas, produk2.jenisProduk, tas.namaTas, produk2.merk, produk2.deskripsi, produk2.warna, produk2.ukuran, produk2.jenisBahan, produk2.harga, detailPesanan.jumlahTas, detailPesanan.totalHarTas, detailPesanan.id_pesanan, pesanan.statusPesanan, pesanan.tanggalPenerimaan, pesanan.verifikasi, user.namaLengkap, kasir.nomorHandphone, detailPesanan.jumlahPembelian, detailPesanan.hargaTotalProduk FROM detailPesanan INNER JOIN pesanan ON detailPesanan.id_pesanan = pesanan.id INNER JOIN kasir ON pesanan.id_kasir = kasir.id_kasir INNER JOIN user ON user.id_user = kasir.id_user INNER JOIN customer ON detailPesanan.id_customer = customer.id_customer INNER JOIN user user1 ON customer.id_user = user1.id_user INNER JOIN celana ON detailPesanan.id_celana = celana.id_celana INNER JOIN produk ON celana.id = produk.id INNER JOIN baju ON detailPesanan.id_baju = baju.id_baju INNER JOIN produk produk1 ON produk1.id = baju.id INNER JOIN tas ON tas.id_tas = detailPesanan.id_tas INNER JOIN produk produk2 ON tas.id = produk2.id'
         daftar = self.executeQuery(self.query, True)
         return daftar
+
+    def getDataRowDetPesanan(self):
+        self.query = 'SELECT id FROM detailPesanan ORDER BY id DESC LIMIT 1'
+        id = self.executeQuery(self.query, retVal=True)
+        return id
 
 pengguna = User()
 adm = Admin()
@@ -1268,6 +1278,15 @@ def hapusDataTas():
     taS._deleteDataTas(id_tas)
     print('Data berhasil Dihapus')
 
+def lihatIDPesanan():
+    global order
+    print('\nDaftar Pesanan')
+    daftarOrder = order.getDataRowPesanan()
+    for user_row in daftarOrder:
+        print()
+        print("ID Order:", user_row[0])
+        print()
+
 def tambahDataPesanan():
     global order
     print('\nTambah Data Pesanan')
@@ -1332,6 +1351,15 @@ def ubahDataPesanan():
     order.setUbahDataPesanan(id_kasir, id, statusPesanan, tanggalPenerimaan, verifikasi)
     print('\n')
     print('Data Berhasil Diubah')
+
+def lihatIDDetPesanan():
+    global detailOrder
+    print('\nDaftar Detail Pesanan')
+    daftarDetOrder = detailOrder.getDataRowDetPesanan()
+    for user_row in daftarDetOrder:
+        print()
+        print("ID Detail Order:", user_row[0])
+        print()
 
 def tampilkanSatuDataPesanan():
     global order
@@ -1653,14 +1681,16 @@ def fiturCustomer():
     print('6. Melihat Data Celana')
     print('7. Melihat Data Baju')
     print('8. Melihat Data Tas')
-    print('9. Melihat Data Pesanan')
-    print('10. Menambah Data Pesanan')
-    print('11. Mengubah Data Pesanan')
-    print('12. Menambah Data Detail Pesanan')
-    print('13. Mengubah Data Detail Pesanan')
-    print('14. Melihat Data Detail Pesanan')
-    print('15. Melihat Riwayat Pesanan')
-    print('16. LOGOUT')
+    print('9. Melihat Data ID Pesanan Terakhir')
+    print('10. Melihat Data Pesanan')
+    print('11. Menambah Data Pesanan')
+    print('12. Mengubah Data Pesanan')
+    print('13. Melihat Data ID Detail Pesanan Terakhir')
+    print('14. Menambah Data Detail Pesanan')
+    print('15. Mengubah Data Detail Pesanan')
+    print('16. Melihat Data Detail Pesanan')
+    print('17. Melihat Riwayat Pesanan')
+    print('18. LOGOUT')
 
     pilihFiturCustomer = input('Masukkan pilihan: ')
     print()
@@ -1903,20 +1933,24 @@ while jalanUser:
                     elif pilihFiturCustomer == '8':
                         tampilkanDataTas()
                     elif pilihFiturCustomer == '9':
-                        tampilkanSatuDataPesanan()
+                        lihatIDPesanan()
                     elif pilihFiturCustomer == '10':
-                        tambahDataPesanan()
+                        tampilkanSatuDataPesanan()
                     elif pilihFiturCustomer == '11':
-                        ubahDataPesanan()
+                        tambahDataPesanan()
                     elif pilihFiturCustomer == '12':
-                        tambahDataDetPesanan()
+                        ubahDataPesanan()
                     elif pilihFiturCustomer == '13':
-                        ubahDataDetPesanan()
+                        lihatIDDetPesanan()
                     elif pilihFiturCustomer == '14':
-                        tampilkanSatuDataDetPesanan()
+                        tambahDataDetPesanan()
                     elif pilihFiturCustomer == '15':
-                        tampilkanSatuDataDetPesananCus()
+                        ubahDataDetPesanan()
                     elif pilihFiturCustomer == '16':
+                        tampilkanSatuDataDetPesanan()
+                    elif pilihFiturCustomer == '17':
+                        tampilkanSatuDataDetPesananCus()
+                    elif pilihFiturCustomer == '18':
                         exit()
 
             elif pilihCustomer == '2':
