@@ -898,6 +898,17 @@ def tambahDataDetPesanan():
     connection.commit()
     print('Data Berhasil Ditambahkan')
 
+def ubahDataDetPesananKasir():
+    global connection
+    print('\nUbah Data Detail Pesanan')
+    _id_DetPesanan = input('Masukkan ID Detail Pesanan: ')
+    _id_pesanan = input('Masukkan ID Pesanan: ')
+    query = f'UPDATE detailPesanan SET (id_pesanan) = {_id_pesanan} WHERE id_DetPesanan = {_id_DetPesanan}'
+    print('\n')
+    print('Data Berhasil Diubah')
+    connection.execute(query)
+    connection.commit()
+
 def ubahDataDetPesanan():
     global connection
     print('\nUbah Data Detail Pesanan')
@@ -1377,9 +1388,9 @@ while jalanUser:
                     elif pilihFiturKasir == '8':
                         ubahDataPesanan()
                     elif pilihFiturKasir == '9':
-                        tampilkanDataPesanan()
+                        tampilkanSatuDataDetPesananPemilik()
                     elif pilihFiturKasir == '10':
-                        tambahDataPesanan()
+                        ubahDataDetPesananKasir()
                     elif pilihFiturKasir == '11':
                         exit()
 
